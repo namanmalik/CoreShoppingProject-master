@@ -13,7 +13,7 @@ namespace CoreEcommerceUserPanal.Controllers
     
     public class HomeController : Controller
     {
-        ShoppingProjectContext context = new ShoppingProjectContext();
+        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
         
          [HttpGet]
         public IActionResult Index()
@@ -39,21 +39,21 @@ namespace CoreEcommerceUserPanal.Controllers
             }
             return View(product);
         }
-        [Route("Login")]
-        [HttpPost]
-        public IActionResult Login(string username, string password)
-        {
-            if (username != null && password != null && username.Equals("user") && password.Equals("123456"))
-            {
-                HttpContext.Session.SetString("uname", username);
-                return View("Home");
-            }
-            else
-            {
-                ViewBag.Error = "Invalid Credentials";
-                return View("Index");
-            }
-        }
+        //[Route("Login")]
+        //[HttpPost]
+        //public IActionResult Login(string username, string password)
+        //{
+        //    if (username != null && password != null && username.Equals("user") && password.Equals("123456"))
+        //    {
+        //        HttpContext.Session.SetString("uname", username);
+        //        return View("Home");
+        //    }
+        //    else
+        //    {
+        //        ViewBag.Error = "Invalid Credentials";
+        //        return View("Index");
+        //    }
+        //}
         public IActionResult Display()
         {
             return View();
@@ -88,5 +88,11 @@ namespace CoreEcommerceUserPanal.Controllers
         //    AddErrors(result);
         //    return View(model);
         //}
+
+        public IActionResult HomePage()
+        {
+            return View();
+        }
     }
+
 }

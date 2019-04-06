@@ -17,23 +17,20 @@
     <link rel="stylesheet" href="~/css/StarterTemplate.css" />
 </head>
 <body class="text-center">
-    <p>@ViewBag.Error</p>
+    
     <form class="form-signin" method="post" asp-controller="Customers" asp-action="Login">
         <img class="mb-4" src="~/images/shopping-mania.jpg" alt="" width="72" height="72">
         <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-
+        <p>@ViewBag.Error</p>
         <div class="col-12 mb-3">
             <label asp-for="UserName" class="sr-only">User Name</label>
             <input type="text" asp-for="UserName" class="form-control" placeholder="Enter User Name">
         </div>
-
         <div class="col-12 mb-3">
             <label asp-for="Password" class="sr-only">Password</label>
             <input type="password" asp-for="Password" class="form-control" placeholder="Enter Password">
         </div>
-
         <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-
         <a asp-controller="Customers" asp-action="Register" class="btn btn-lg btn-primary btn-block">Sign Up</a>
         <p class="mt-5 mb-3 text-muted">&copy; 2017-2019</p>
     </form>

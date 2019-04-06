@@ -34,7 +34,8 @@ namespace CoreShoppingAdminPortal.Models
         public string Password { get; set; }
      
         public bool Shipping_Address { get; set; }
-       
+
+        public List<Feedback> Feedbacks { get; set; }
         public List<Order> Orders { get; set; }
     }
 }

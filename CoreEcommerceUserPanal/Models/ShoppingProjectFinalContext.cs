@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CoreEcommerceUserPanal.Models
 {
-    public partial class ShoppingProjectContext : DbContext
+    public partial class ShoppingProjectFinalContext : DbContext
     {
-        public ShoppingProjectContext()
+        public ShoppingProjectFinalContext()
         {
         }
 
-        public ShoppingProjectContext(DbContextOptions<ShoppingProjectContext> options)
+        public ShoppingProjectFinalContext(DbContextOptions<ShoppingProjectFinalContext> options)
             : base(options)
         {
         }
@@ -18,6 +18,7 @@ namespace CoreEcommerceUserPanal.Models
         public virtual DbSet<Admins> Admins { get; set; }
         public virtual DbSet<Categories> Categories { get; set; }
         public virtual DbSet<Customers> Customers { get; set; }
+        public virtual DbSet<Feedbacks> Feedbacks { get; set; }
         public virtual DbSet<OrderProducts> OrderProducts { get; set; }
         public virtual DbSet<Orders> Orders { get; set; }
         public virtual DbSet<Products> Products { get; set; }
@@ -49,6 +50,17 @@ namespace CoreEcommerceUserPanal.Models
                 entity.HasKey(e => e.CustomerId);
 
                 entity.Property(e => e.ShippingAddress).HasColumnName("Shipping_Address");
+            });
+
+            modelBuilder.Entity<Feedbacks>(entity =>
+            {
+                entity.HasKey(e => e.FeedbackId);
+
+                entity.HasIndex(e => e.CustomerId);
+
+                entity.HasOne(d => d.Customer)
+                    .WithMany(p => p.Feedbacks)
+                    .HasForeignKey(d => d.CustomerId);
             });
 
             modelBuilder.Entity<OrderProducts>(entity =>

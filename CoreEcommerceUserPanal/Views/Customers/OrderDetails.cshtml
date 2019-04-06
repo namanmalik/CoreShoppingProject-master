@@ -1,0 +1,37 @@
+﻿
+@{
+    ViewData["Title"] = "OrderDetails";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+
+<h2>Products</h2>
+
+<table class="table table-hover">
+    <tr>
+        <th>
+            Product ID
+        </th>
+        <th>
+            Product Name
+        </th>
+     
+        <th>
+           Action
+        </th>
+    </tr>
+    @foreach (var item in ViewBag.p)
+    {
+    <tr>
+        <td>
+            @item.ProductId
+        </td>
+        <td>
+            @item.ProductName
+        </td>
+        <td><a asp-controller="cart" asp-action="Details" class="btn btn-info"
+        asp-route-id="@item.ProductId">Product Details</a></td>
+    </tr>
+    }
+</table>
+<a asp-controller="Customer" asp-action="OrderHistory" class="btn btn-info">Back </a>
+</br>

@@ -26,7 +26,7 @@ namespace CoreEcommerceUserPanal.Controllers
         {
             context.Customers.Add(cust);
             context.SaveChanges();
-
+            HttpContext.Session.SetString("logout",cust.UserName);
             return RedirectToAction("Login");
         }
         public IActionResult Login()
@@ -55,6 +55,7 @@ namespace CoreEcommerceUserPanal.Controllers
                 {
                     HttpContext.Session.SetString("uname", username);
                     SessionHelper.SetObjectAsJson(HttpContext.Session,"cust",user);
+                    HttpContext.Session.SetString("logout", userName);
                     return RedirectToAction("Index", "Home", new
                     {
                         @id = custId
@@ -72,6 +73,7 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Remove("uname");
+            HttpContext.Session.Remove("logout");
             return RedirectToAction("Index", "Home");
         }
 

@@ -11,7 +11,12 @@ namespace CoreEcommerceUserPanal.Controllers
 {
     public class CustomersController : Controller
     {
-        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+        private readonly ShoppingProjectFinalContext _context;
+        public CustomersController(ShoppingProjectFinalContext context)
+        {
+            _context = context;
+        }
+        //ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
         public IActionResult Index()
         {
             return View();
@@ -22,10 +27,10 @@ namespace CoreEcommerceUserPanal.Controllers
             return View();
         }
         [HttpPost]
-        public ActionResult Register(Customers cust)
+        public IActionResult Register(Customers cust)
         {
-            context.Customers.Add(cust);
-            context.SaveChanges();
+            _context.Customers.Add(cust);
+            _context.SaveChanges();
             HttpContext.Session.SetString("logout",cust.UserName);
             return RedirectToAction("Login");
         }
@@ -40,7 +45,7 @@ namespace CoreEcommerceUserPanal.Controllers
         {
            
             
-            var user = context.Customers.Where(a => a.UserName == username).SingleOrDefault();
+            var user = _context.Customers.Where(a => a.UserName == username).SingleOrDefault();
             ViewBag.cust = user;
             if (user == null)
             {
@@ -85,7 +90,7 @@ namespace CoreEcommerceUserPanal.Controllers
         [HttpPost]
         public IActionResult custEdit(int id, Customers customer)
         {
-            var c = context.Customers.Where(x => x.UserName == customer.UserName).SingleOrDefault();
+            var c = _context.Customers.Where(x => x.UserName == customer.UserName).SingleOrDefault();
             c.FirstName = customer.FirstName;
             c.LastName = customer.LastName;
             c.UserName = customer.UserName;
@@ -96,7 +101,7 @@ namespace CoreEcommerceUserPanal.Controllers
             c.State = customer.State;
             c.Zip = customer.Zip;
 
-            context.SaveChanges();
+            _context.SaveChanges();
             SessionHelper.SetObjectAsJson(HttpContext.Session, "cust", c);
             return RedirectToAction("Index", "Home", new { @id = customer.UserName });
         }
@@ -110,7 +115,7 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult OrderHistory()
         {
             Customers c = SessionHelper.GetObjectFromJson<Customers>(HttpContext.Session, "cust");
-            List<Orders> ord = context.Orders.Where(x => x.CustomerId == c.CustomerId).ToList();
+            List<Orders> ord = _context.Orders.Where(x => x.CustomerId == c.CustomerId).ToList();
             ViewBag.ord = ord;
             return View();
         }
@@ -118,10 +123,10 @@ namespace CoreEcommerceUserPanal.Controllers
         {
             List<OrderProducts> op = new List<OrderProducts>();
             List<Products> products = new List<Products>();
-            op = context.OrderProducts.Where(x => x.OrderId == id).ToList();
+            op = _context.OrderProducts.Where(x => x.OrderId == id).ToList();
             foreach(var item in op)
             {
-                Products c = context.Products.Where(x => x.ProductId == item.ProductId).SingleOrDefault();
+                Products c = _context.Products.Where(x => x.ProductId == item.ProductId).SingleOrDefault();
                 products.Add(c);
             }
             ViewBag.p = products;
@@ -139,10 +144,10 @@ namespace CoreEcommerceUserPanal.Controllers
             Customers c = SessionHelper.GetObjectFromJson<Customers>(HttpContext.Session, "cust");
             if (oldpassword == c.Password && newpassword == newpassword1)
             {
-                Customers cus = context.Customers.Where(x => x.UserName == c.UserName).SingleOrDefault();
+                Customers cus = _context.Customers.Where(x => x.UserName == c.UserName).SingleOrDefault();
                 cus.Password = newpassword;
                 SessionHelper.SetObjectAsJson(HttpContext.Session, "cust", cus);
-                context.SaveChanges();
+                _context.SaveChanges();
                 return RedirectToAction("Details");
             }
 
@@ -155,14 +160,14 @@ namespace CoreEcommerceUserPanal.Controllers
             [HttpGet]
         public ViewResult Feedback()
         {
-            ViewBag.Feed = new SelectList(context.Customers, "CustomerId", "EmailId");
+            ViewBag.Feed = new SelectList(_context.Customers, "CustomerId", "EmailId");
             return View();
         }
         [HttpPost]
         public ActionResult Feedback(Feedbacks fed)
         {
-            context.Feedbacks.Add(fed);
-            context.SaveChanges();
+            _context.Feedbacks.Add(fed);
+            _context.SaveChanges();
 
             return RedirectToAction("Index", "Home");
         }

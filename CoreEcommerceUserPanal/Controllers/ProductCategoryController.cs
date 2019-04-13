@@ -9,17 +9,38 @@ namespace CoreEcommerceUserPanal.Controllers
 {
     public class ProductCategoryController : Controller
     {
-        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+        private readonly ShoppingProjectFinalContext _context;
+        public ProductCategoryController(ShoppingProjectFinalContext context)
+        {
+            _context = context;
+        }
+        //  ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
         public IActionResult Index()
         {
 
-            var pc = context.Categories.ToList();
+            var pc = _context.Categories.ToList();
             return View(pc);
         }
-        public IActionResult ProductDisplay(int id)
+        public IActionResult ProductDisplay(int? id)
         {
-            var p = context.Products.Where(x => x.ProductCategoryId == id).ToList();
+            var p = _context.Products.Where(x => x.ProductCategoryId == id).ToList();
             return View(p);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(int? id)
+        {
+            if (id == null)
+            {
+                return BadRequest();
+            }
+            var productcategory = await _context.Categories.FindAsync(id);
+
+            if (productcategory == null)
+            {
+                return NotFound();
+            }
+            return Ok(productcategory);
         }
     }
 }

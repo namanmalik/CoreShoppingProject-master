@@ -7,20 +7,16 @@ using CoreEcommerceUserPanal.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Stripe;
 
 namespace CoreEcommerceUserPanal.Controllers
 {
     [Route("cart")]
     public class CartController : Controller
     {
-        private readonly ShoppingProjectFinalContext _context;
-        public CartController(ShoppingProjectFinalContext context)
-        {
-            _context = context;
-        }
-        // ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
         [Route("index")]
-       
+
         public IActionResult Index()
         {
 
@@ -37,6 +33,14 @@ namespace CoreEcommerceUserPanal.Controllers
                 {
                     ViewBag.cart = cart;
                     ViewBag.total = cart.Sum(item => item.Products.ProductPrice * item.Quantity);
+                    if (SessionHelper.GetObjectFromJson<Customers>(HttpContext.Session, "cust") == null)
+                    {
+                        ViewBag.i = 0;
+                    }
+                    else
+                    {
+                        ViewBag.i = 1;
+                    }
                     return View();
                 }
 
@@ -46,12 +50,12 @@ namespace CoreEcommerceUserPanal.Controllers
         [Route("buy /{id}")]
         public IActionResult Buy(int id)
         {
-            if(SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session,"cart") == null)
+            if (SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart") == null)
             {
                 List<Item> cart = new List<Item>();
                 cart.Add(new Item
                 {
-                    Products = _context.Products.Find(id),
+                    Products = context.Products.Find(id),
                     Quantity = 1
                 });
                 SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
@@ -60,61 +64,64 @@ namespace CoreEcommerceUserPanal.Controllers
             {
                 List<Item> cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
                 int index = isExist(id);
-                if(index !=-1)
+                if (index != -1)
                 {
                     cart[index].Quantity++;
-;                }
+                    ;
+                }
                 else
                 {
                     cart.Add(new Item
                     {
-                        Products = _context.Products.Find(id),Quantity = 1 });
-                    }
+                        Products = context.Products.Find(id),
+                        Quantity = 1
+                    });
+                }
                 SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
             }
-            return RedirectToAction("Index","Home");
+            return RedirectToAction("Index", "Home");
 
         }
         [Route("Remove/{id}")]
-        
-            public IActionResult Remove(int id)
-            {
-                List<Item> cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
-                int index = isExist(id);
-                cart.RemoveAt(index);
-                SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
-                int j = int.Parse(HttpContext.Session.GetString("cartitem"));
-                int i = 0;
-                foreach (var item in cart)
-                {
-                    i++;
-                }
-                if (i != 0)
-                {
-                    j--;
-                    HttpContext.Session.SetString("cartitem", j.ToString());
-                }
-                else
-                {
-                    HttpContext.Session.Remove("cartitem");
-                    return View("GoBack");
-                }
-                return RedirectToAction("Index");
 
+        public IActionResult Remove(int id)
+        {
+            List<Item> cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
+            int index = isExist(id);
+            cart.RemoveAt(index);
+            SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
+            int j = int.Parse(HttpContext.Session.GetString("cartitem"));
+            int i = 0;
+            foreach (var item in cart)
+            {
+                i++;
             }
+            if (i != 0)
+            {
+                j--;
+                HttpContext.Session.SetString("cartitem", j.ToString());
+            }
+            else
+            {
+                HttpContext.Session.Remove("cartitem");
+                return View("GoBack");
+            }
+            return RedirectToAction("Index");
+
+        }
         [Route("GoBack")]
         public IActionResult GoBack()
         {
             return View();
         }
 
-            private int isExist(int id)
+        private int isExist(int id)
         {
             List<Item> cart = SessionHelper.GetObjectFromJson<List<Item>>
                 (HttpContext.Session, "cart");
-            for(int i=0;i<cart.Count;i++)
+            for (int i = 0; i < cart.Count; i++)
             {
-                if(cart[i].Products.ProductId.Equals(id))
+                if (cart[i].Products.ProductId.Equals(id))
                 {
                     return i;
                 }
@@ -125,91 +132,150 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult Details(int id)
         {
 
-            var detail = _context.Products.Find(id);
-            var cid = _context.Products.Find(id);
-            ViewBag.cname = _context.Categories.Find(cid.ProductCategoryId);
+            var detail = context.Products.Find(id);
+            var cid = context.Products.Find(id);
+            ViewBag.cname = context.Categories.Find(cid.ProductCategoryId);
             return View(detail);
         }
+        [Route("checkout")]
+        [HttpGet]
         public IActionResult Checkout()
         {
             int i = 0;
             ViewBag.i = i;
-            var checkout = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session,"cart");
+            var checkout = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
             ViewBag.checkout = checkout;
             ViewBag.total = checkout.Sum(item => item.Products.ProductPrice * item.Quantity);
             string cust = HttpContext.Session.GetString("uname");
-            Customers cus = _context.Customers.Where(x => x.UserName == cust).SingleOrDefault();
+            Customers cus = context.Customers.Where(x => x.UserName == cust).SingleOrDefault();
             ViewBag.cus = cus;
             ViewBag.totalitem = checkout.Count();
             TempData["total"] = ViewBag.total;
             return View();
         }
+        [Route("checkout")]
         [HttpPost]
-        public IActionResult Checkout(Customers customer)
+        public IActionResult Checkout(Customers customer1, string stripeEmail, string stripeToken)
         {
-            
-         var c = _context.Customers.Where(x => x.UserName == customer.UserName).SingleOrDefault();
-            c.FirstName = customer.FirstName;
-            c.LastName = customer.LastName;
-            c.UserName = customer.UserName;
-            c.EmailId = customer.EmailId;
-            c.Address = customer.Address;
-            c.PhoneNo = customer.PhoneNo;
-            c.Country = customer.Country;
-            c.State = customer.State;
-            c.Zip = customer.Zip;
-            _context.SaveChanges();
-                var amount = (TempData["total"]);
-                Orders orders = new Orders()
-                {
-                    OrderPrice = Convert.ToSingle(amount),
-                    OrderDate = DateTime.Now,
-                    CustomerId = c.CustomerId
 
+            var c = context.Customers.Where(x => x.UserName == customer1.UserName).SingleOrDefault();
+            c.FirstName = customer1.FirstName;
+            c.LastName = customer1.LastName;
+            c.UserName = customer1.UserName;
+            c.EmailId = customer1.EmailId;
+            c.Address = customer1.Address;
+            c.PhoneNo = customer1.PhoneNo;
+            c.Country = customer1.Country;
+            c.State = customer1.State;
+            c.Zip = customer1.Zip;
+            context.SaveChanges();
+            var amount1 = (TempData["total"]);
+            Orders orders = new Orders()
+            {
+                OrderPrice = Convert.ToSingle(amount1),
+                OrderDate = DateTime.Now,
+                CustomerId = c.CustomerId
+
+            };
+            context.Orders.Add(orders);
+
+            context.SaveChanges();
+            TempData["orderId"] = orders.OrderId;
+            var cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
+            List<OrderProducts> OrderProducts = new List<OrderProducts>();
+
+            for (int i = 0; i < cart.Count; i++)
+            {
+                OrderProducts orderproducts = new OrderProducts()
+                {
+                    OrderId = orders.OrderId,
+                    ProductId = cart[i].Products.ProductId,
+                    Quantity = cart[i].Quantity
                 };
-                _context.Orders.Add(orders);
-                _context.SaveChanges();
-                var cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
-                List<OrderProducts> OrderProducts = new List<OrderProducts>();
+                OrderProducts.Add(orderproducts);
+            }
+            OrderProducts.ForEach(n => context.OrderProducts.Add(n));
+            context.SaveChanges();
+            TempData["cust"] = c.CustomerId;
 
-                for (int i = 0; i < cart.Count; i++)
-                {
-                    OrderProducts orderproducts = new OrderProducts()
-                    {
-                        OrderId = orders.OrderId,
-                        ProductId = cart[i].Products.ProductId,
-                        Quantity = cart[i].Quantity
-                    };
-                    OrderProducts.Add(orderproducts);
-                }
-                OrderProducts.ForEach(n => _context.OrderProducts.Add(n));
-                _context.SaveChanges();
-                TempData["cust"] = c.CustomerId;
-                return RedirectToAction("Invoice");
-            //}
-            //return View();
+
+
+            var customers = new CustomerService();
+            var charges = new ChargeService();
+            var amount = TempData["total"];
+            var order = TempData["orderId"];
+            var custt = TempData["cust"];
+            var customer = customers.Create(new CustomerCreateOptions
+            {
+                Email = stripeEmail,
+                SourceToken = stripeToken
+            });
+
+            var charge = charges.Create(new ChargeCreateOptions
+            {
+                Amount = 55,
+                Description = "Sample Charge",
+                Currency = "usd",
+                CustomerId = customer.Id
+            });
+
+            Payments payment = new Payments();
+            {
+                payment.PaymentStripeId = charge.PaymentMethodId;
+                payment.Amount = Convert.ToInt32(amount);
+                payment.Paymentdate = System.DateTime.Now;
+                payment.CardNo = Convert.ToInt32(charge.PaymentMethodDetails.Card.Last4);
+                payment.OrderId = Convert.ToInt32(order);
+                payment.CustomerId = Convert.ToInt32(custt);
+            }
+            //var customerService = new CustomerService();
+            //ViewBag.details = charge.PaymentMethodDetails.Card.Last4;
+            context.Add<Payments>(payment);
+            context.Payments.Add(payment);
+            context.SaveChanges();
+
+            return RedirectToAction("Invoice", "Cart");
+
         }
+
+
+
+        public IActionResult PaymentIndex()
+        {
+            var checkout = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
+            ViewBag.checkout = checkout;
+            ViewBag.total = checkout.Sum(item => item.Products.ProductPrice * item.Quantity);
+
+            return View();
+        }
+
+        public IActionResult Error()
+        {
+            return View();
+        }
+
+
         [Route("Invoice")]
         public IActionResult Invoice()
         {
             int customerid = int.Parse(TempData["cust"].ToString());
-            Customers customer = _context.Customers.Where(x => x.CustomerId == customerid).SingleOrDefault();
+            Customers customer = context.Customers.Where(x => x.CustomerId == customerid).SingleOrDefault();
             ViewBag.Customers = customer;
 
             var cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
             ViewBag.cart = cart;
-            foreach(var Item in cart)
+            foreach (var Item in cart)
             {
-                Products p = _context.Products.Find(Item.Products.ProductId);
+                Products p = context.Products.Find(Item.Products.ProductId);
                 p.ProductQty = p.ProductQty - Item.Quantity;
-                _context.SaveChanges();
+                context.SaveChanges();
             }
             ViewBag.total = cart.Sum(item => item.Products.ProductPrice * item.Quantity);
             cart = null;
             SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
             HttpContext.Session.Remove("cartitem");
-            
-                return View();
+
+            return View();
         }
         [Route("Plus")]
         [HttpGet]
@@ -225,7 +291,7 @@ namespace CoreEcommerceUserPanal.Controllers
             {
                 cart.Add(new Item
                 {
-                    Products = _context.Products.Find(id),
+                    Products = context.Products.Find(id),
                     Quantity = 1
                 });
 
@@ -252,7 +318,7 @@ namespace CoreEcommerceUserPanal.Controllers
             SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
             return RedirectToAction("Index");
         }
-       
+
 
     }
 }

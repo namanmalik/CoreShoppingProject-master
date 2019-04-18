@@ -1,52 +1,107 @@
-﻿@model CoreEcommerceUserPanal.Models.Customers
+﻿
+@model CoreEcommerceUserPanal.Models.Customers
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_UserLayout.cshtml";
 }
+<style>
+    .tb {
+        margin-left: 100px;
+    }
 
-<h2>Details</h2>
+    body {
+        font-family: "Lato", sans-serif;
+    }
 
-&nbsp;&nbsp;
-<table class="table">
-    <thead class="thead-dark">
-        <tr>
+    .sidenav {
+        width: 160px;
+        position: fixed;
+        z-index: 1;
+        top: 20px;
+        left: -10px;
+        background: black;
+        overflow-x: hidden;
+        padding: 8px 0;
+        height: 700px;
+    }
 
+        .sidenav a {
+            padding: 50px 8px 6px 16px;
+            text-decoration: none;
+            font-size: 20px;
+            color: white;
+            display: block;
+        }
 
-            <th scope="col">@Html.DisplayNameFor(Model => Model.FirstName)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.LastName)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.UserName)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.Password)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.EmailId)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.Address)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.PhoneNo)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.Country)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.State)</th>
-            <th scope="col">@Html.DisplayNameFor(Model => Model.Zip)</th>
+            .sidenav a:hover {
+                color: #064579;
+            }
 
+    .main {
+        margin-left: 140px; /* Same width as the sidebar + left position in px */
+        font-size: 28px; /* Increased text to enable scrolling */
+        padding: 0px 10px;
+    }
 
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
+    media screen and (max-height: 450px) {
+        .sidenav
 
+    {
+        padding-top: 15px;
+    }
 
-            <th> @Html.DisplayFor(Model => Model.FirstName)</th>
-            <th> @Html.DisplayFor(Model => Model.LastName)</th>
-            <th>@Html.DisplayFor(Model => Model.UserName)</th>
-            <th>@Html.DisplayFor(Model => Model.EmailId)</th>
-            <th>@Html.DisplayFor(Model => Model.Password)</th>
-            <th>@Html.DisplayFor(Model => Model.Address)</th>
-            <th>@Html.DisplayFor(Model => Model.PhoneNo)</th>
-            <th>@Html.DisplayFor(Model => Model.Country)</th>
-            <th>@Html.DisplayFor(Model => Model.State)</th>
-            <th>@Html.DisplayFor(Model => Model.Zip)</th>
+    .sidenav a {
+        font-size: 18px;
+    }
+    }
+</style>
 
-        </tr>
+<div class="sidenav">
+    <a class="nav-link" asp-controller="customers" asp-action="Details">My Profile</a>
+    <a class="nav-link" asp-controller="customers" asp-action="OrderHistory">My Orders</a>
+    <a class="nav-link" asp-controller="customers" asp-action="custEdit">Edit Profile</a>
+    <a class="nav-link" asp-controller="customers" asp-action="password">Reset Password</a>
+    <a class="nav-link" asp-controller="customers" asp-action="Feedback">FeedBack</a>
+</div>
 
+<link href="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 
-    </tbody>
-</table>
+<link href="~/css/profile.css" rel="stylesheet" />
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<!------ Include the above in your HEAD tag ---------->
+<h5>
+    User Profile
+
+</h5>
+<div class="container">
+    <div class="row">
+        <div class="col-md-6 img">
+
+            <img src="~/images/profile.png" class="img-rounded">
+        </div>
+        <div class="col-md-6 details">
+            <p>
+
+                Name:  @Html.DisplayFor(Model => Model.FirstName)
+                @Html.DisplayFor(Model => Model.LastName)<br>
+
+                EmailId: @Html.DisplayFor(Model => Model.EmailId)<br>
+
+                Password: @Html.DisplayFor(Model => Model.Password)<br>
+                UserName: @Html.DisplayFor(Model => Model.UserName) <br>
+                Address: @Html.DisplayFor(Model => Model.Address)<br>
+                PhoneNo: @Html.DisplayFor(Model => Model.PhoneNo)<br>
+                Country: @Html.DisplayFor(Model => Model.Country)<br>
+                State: @Html.DisplayFor(Model => Model.State)<br>
+                Zip: @Html.DisplayFor(Model => Model.Zip)<br>
+
+            </p>
+
+        </div>
+    </div>
+</div>
 <center>
-    <a asp-controller="Home" asp-action="About">
-    <button type="button" class="btn btn-success btn1">Back</button></a>
+    <a asp-controller="Home" asp-action="Index"><button type="button" class="btn btn-success btn1">Back to List</button></a>
 </center>
+

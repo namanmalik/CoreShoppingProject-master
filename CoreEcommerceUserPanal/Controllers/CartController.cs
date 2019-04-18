@@ -50,6 +50,11 @@ namespace CoreEcommerceUserPanal.Controllers
         [Route("buy /{id}")]
         public IActionResult Buy(int id)
         {
+            Products p = context.Products.Find(id);
+            if (p.ProductQty < 1)
+            {
+                return RedirectToAction("OutofStock", "cart", new { @id = id });
+            }
             if (SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart") == null)
             {
                 List<Item> cart = new List<Item>();
@@ -319,6 +324,15 @@ namespace CoreEcommerceUserPanal.Controllers
             return RedirectToAction("Index");
         }
 
+      
+        [Route("OutofStock/{id}")]
+        public IActionResult OutofStock(int id)
+        {
+            var detail = context.Products.Find(id);
+            var cid = context.Products.Find(id);
+            ViewBag.cname = context.Categories.Find(cid.ProductCategoryId);
+            return View(detail);
 
+        }
     }
 }

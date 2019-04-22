@@ -16,6 +16,7 @@ namespace CoreEcommerceUserPanal.Models
         }
 
         public virtual DbSet<Admins> Admins { get; set; }
+        public virtual DbSet<Brands> Brands { get; set; }
         public virtual DbSet<Categories> Categories { get; set; }
         public virtual DbSet<Customers> Customers { get; set; }
         public virtual DbSet<Feedbacks> Feedbacks { get; set; }
@@ -39,6 +40,11 @@ namespace CoreEcommerceUserPanal.Models
             modelBuilder.Entity<Admins>(entity =>
             {
                 entity.HasKey(e => e.AdminId);
+            });
+
+            modelBuilder.Entity<Brands>(entity =>
+            {
+                entity.HasKey(e => e.BrandId);
             });
 
             modelBuilder.Entity<Categories>(entity =>
@@ -105,9 +111,15 @@ namespace CoreEcommerceUserPanal.Models
             {
                 entity.HasKey(e => e.ProductId);
 
+                entity.HasIndex(e => e.BrandId);
+
                 entity.HasIndex(e => e.ProductCategoryId);
 
                 entity.HasIndex(e => e.VendorId);
+
+                entity.HasOne(d => d.Brand)
+                    .WithMany(p => p.Products)
+                    .HasForeignKey(d => d.BrandId);
 
                 entity.HasOne(d => d.ProductCategory)
                     .WithMany(p => p.Products)

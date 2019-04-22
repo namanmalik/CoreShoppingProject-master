@@ -9,21 +9,22 @@ namespace CoreEcommerceUserPanal.Controllers
 {
     public class ProductCategoryController : Controller
     {
-        private readonly ShoppingProjectFinalContext _context;
-        public ProductCategoryController(ShoppingProjectFinalContext context)
-        {
-            _context = context;
-        }
-        //  ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+        //private readonly ShoppingProjectFinalContext _context;
+        //public ProductCategoryController(ShoppingProjectFinalContext context)
+        //{
+        //    _context = context;
+        //}
+        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+
         public IActionResult Index()
         {
 
-            var pc = _context.Categories.ToList();
+            var pc = context.Categories.ToList();
             return View(pc);
         }
         public IActionResult ProductDisplay(int? id)
         {
-            var p = _context.Products.Where(x => x.ProductCategoryId == id).ToList();
+            var p = context.Products.Where(x => x.ProductCategoryId == id).ToList();
             return View(p);
         }
 
@@ -34,7 +35,7 @@ namespace CoreEcommerceUserPanal.Controllers
             {
                 return BadRequest();
             }
-            var productcategory = await _context.Categories.FindAsync(id);
+            var productcategory = await context.Categories.FindAsync(id);
 
             if (productcategory == null)
             {

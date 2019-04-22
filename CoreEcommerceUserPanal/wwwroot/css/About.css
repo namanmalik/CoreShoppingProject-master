@@ -1,5 +1,4 @@
-﻿
-.bd-placeholder-img {
+﻿.bd-placeholder-img {
     font-size: 1.125rem;
     text-anchor: middle;
     -webkit-user-select: none;
@@ -71,6 +70,7 @@ body {
 img {
     max-width: 50%;
     height: auto;
+   
 }
 
 iframe {
@@ -206,13 +206,14 @@ a,
 /* Sections */
 .navbar-custom + .main {
     margin-top: 50px;
-    margin-right: 100px;
+    margin-right:100px;
 }
 
 .main {
     position: relative;
     background-color: #fff;
     z-index: 1;
+   
 }
 
 .module,
@@ -1493,6 +1494,8 @@ General Styles - Owlcarousel
 /* About us Page Header */
 .about-page-header:before {
     background: rgba(2, 2, 2, 0.2);
+  
+  
 }
 
 /* Service Page Header */
@@ -3592,7 +3595,7 @@ img.mfp-img {
 
     .mfp-container {
         padding-left: 1px;
-        padding-right: 1px;
+        padding-right:1px;
     }
 }
 

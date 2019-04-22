@@ -18,10 +18,10 @@ namespace CoreShoppingAdminPortal.Models
         public string ProductDescription { get; set; }
         public int VendorId { get; set; }
         public Vendor Vendor { get; set; }
-     public int ProductCategoryId { get; set; }
+         public int ProductCategoryId { get; set; }
         public ProductCategory Category { get; set; }
-        //public int BrandId { get; set; }
-        //public Brand Brands { get; set; }
+        public int BrandId { get; set; }
+        public Brand Brands { get; set; }
         public List<OrderProduct> OrderProducts { get; set; }
 
     }

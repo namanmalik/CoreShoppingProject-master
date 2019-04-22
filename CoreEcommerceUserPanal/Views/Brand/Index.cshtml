@@ -1,0 +1,52 @@
+﻿@model IEnumerable<CoreEcommerceUserPanal.Models.Brands>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_UserLayout.cshtml";
+}
+<!-- Start Banner Area -->
+<section class="banner-area organic-breadcrumb">
+    <div class="container">
+        <div class="breadcrumb-banner d-flex flex-wrap align-items-center justify-content-end">
+            <div class="col-first">
+                <h1>Brands</h1>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- End Banner Area -->
+<br /><br /><br /><br />
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.BrandId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrandName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.BrandDescription)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BrandId)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BrandName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.BrandDescription)
+                </td>
+                <td>
+                    <a asp-controller="Brand" asp-action="ProductDisplay" asp-route-id="@item.BrandId" class="btn btn-sm btn-outline-secondary">Choose</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

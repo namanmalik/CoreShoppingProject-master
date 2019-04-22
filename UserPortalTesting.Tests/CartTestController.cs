@@ -92,13 +92,13 @@ namespace UserPortalTesting.Tests
             Assert.Throws<NullReferenceException>(() =>
             {
                 var controller = new CartController(context);
-              
+
                 var data = controller.Invoice();
                 Assert.IsType<ViewResult>(data);
             });
         }
 
-       
+
     }
 }
 

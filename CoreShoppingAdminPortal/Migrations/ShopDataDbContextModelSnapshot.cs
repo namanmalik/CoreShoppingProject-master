@@ -36,6 +36,21 @@ namespace CoreShoppingAdminPortal.Migrations
                     b.ToTable("Admins");
                 });
 
+            modelBuilder.Entity("CoreShoppingAdminPortal.Models.Brand", b =>
+                {
+                    b.Property<int>("BrandId")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BrandDescription");
+
+                    b.Property<string>("BrandName");
+
+                    b.HasKey("BrandId");
+
+                    b.ToTable("Brands");
+                });
+
             modelBuilder.Entity("CoreShoppingAdminPortal.Models.Customer", b =>
                 {
                     b.Property<int>("CustomerId")
@@ -157,6 +172,8 @@ namespace CoreShoppingAdminPortal.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
+                    b.Property<int>("BrandId");
+
                     b.Property<int>("ProductCategoryId");
 
                     b.Property<string>("ProductDescription");
@@ -172,6 +189,8 @@ namespace CoreShoppingAdminPortal.Migrations
                     b.Property<int>("VendorId");
 
                     b.HasKey("ProductId");
+
+                    b.HasIndex("BrandId");
 
                     b.HasIndex("ProductCategoryId");
 
@@ -253,6 +272,11 @@ namespace CoreShoppingAdminPortal.Migrations
 
             modelBuilder.Entity("CoreShoppingAdminPortal.Models.Product", b =>
                 {
+                    b.HasOne("CoreShoppingAdminPortal.Models.Brand", "Brands")
+                        .WithMany("Products")
+                        .HasForeignKey("BrandId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
                     b.HasOne("CoreShoppingAdminPortal.Models.ProductCategory", "Category")
                         .WithMany("Products")
                         .HasForeignKey("ProductCategoryId")

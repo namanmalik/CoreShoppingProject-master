@@ -9,7 +9,7 @@ namespace CoreShoppingAdminPortal.Controllers
 {
     public class CustomerController : Controller
     {
-        ShopDataDbContext context;
+      private readonly  ShopDataDbContext context;
         public CustomerController(ShopDataDbContext _context)
         {
             context = _context;

@@ -18,7 +18,7 @@ namespace CoreShoppingAdminPortal.Models
         public DbSet<Feedback> Feedbacks { get; set; }
         public DbSet<OrderProduct> OrderProducts { get; set; }
         public DbSet<Payment> Payments { get; set; }
-        //public DbSet<Brand> Brands { get; set; }
+        public DbSet<Brand> Brands { get; set; }
         public ShopDataDbContext(DbContextOptions<ShopDataDbContext> options) : base(options) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

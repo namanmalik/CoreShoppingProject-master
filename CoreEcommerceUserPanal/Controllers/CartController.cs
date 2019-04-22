@@ -14,7 +14,12 @@ namespace CoreEcommerceUserPanal.Controllers
     [Route("cart")]
     public class CartController : Controller
     {
-        ShoppingProjectFinalContext context = new ShoppingProjectFinalContext();
+        private readonly ShoppingProjectFinalContext _context;
+        public CartController(ShoppingProjectFinalContext context)
+        {
+            _context = context;
+        }
+    
         [Route("index")]
 
         public IActionResult Index()
@@ -50,7 +55,7 @@ namespace CoreEcommerceUserPanal.Controllers
         [Route("buy /{id}")]
         public IActionResult Buy(int id)
         {
-            Products p = context.Products.Find(id);
+            Products p = _context.Products.Find(id);
             if (p.ProductQty < 1)
             {
                 return RedirectToAction("OutofStock", "cart", new { @id = id });
@@ -60,7 +65,7 @@ namespace CoreEcommerceUserPanal.Controllers
                 List<Item> cart = new List<Item>();
                 cart.Add(new Item
                 {
-                    Products = context.Products.Find(id),
+                    Products = _context.Products.Find(id),
                     Quantity = 1
                 });
                 SessionHelper.SetObjectAsJson(HttpContext.Session, "cart", cart);
@@ -78,7 +83,7 @@ namespace CoreEcommerceUserPanal.Controllers
                 {
                     cart.Add(new Item
                     {
-                        Products = context.Products.Find(id),
+                        Products = _context.Products.Find(id),
                         Quantity = 1
                     });
                 }
@@ -137,9 +142,9 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult Details(int id)
         {
 
-            var detail = context.Products.Find(id);
-            var cid = context.Products.Find(id);
-            ViewBag.cname = context.Categories.Find(cid.ProductCategoryId);
+            var detail = _context.Products.Find(id);
+            var cid = _context.Products.Find(id);
+            ViewBag.cname = _context.Categories.Find(cid.ProductCategoryId);
             return View(detail);
         }
         [Route("checkout")]
@@ -152,7 +157,7 @@ namespace CoreEcommerceUserPanal.Controllers
             ViewBag.checkout = checkout;
             ViewBag.total = checkout.Sum(item => item.Products.ProductPrice * item.Quantity);
             string cust = HttpContext.Session.GetString("uname");
-            Customers cus = context.Customers.Where(x => x.UserName == cust).SingleOrDefault();
+            Customers cus = _context.Customers.Where(x => x.UserName == cust).SingleOrDefault();
             ViewBag.cus = cus;
             ViewBag.totalitem = checkout.Count();
             TempData["total"] = ViewBag.total;
@@ -163,7 +168,7 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult Checkout(Customers customer1, string stripeEmail, string stripeToken)
         {
 
-            var c = context.Customers.Where(x => x.UserName == customer1.UserName).SingleOrDefault();
+            var c = _context.Customers.Where(x => x.UserName == customer1.UserName).SingleOrDefault();
             c.FirstName = customer1.FirstName;
             c.LastName = customer1.LastName;
             c.UserName = customer1.UserName;
@@ -173,7 +178,7 @@ namespace CoreEcommerceUserPanal.Controllers
             c.Country = customer1.Country;
             c.State = customer1.State;
             c.Zip = customer1.Zip;
-            context.SaveChanges();
+            _context.SaveChanges();
             var amount1 = (TempData["total"]);
             Orders orders = new Orders()
             {
@@ -182,9 +187,9 @@ namespace CoreEcommerceUserPanal.Controllers
                 CustomerId = c.CustomerId
 
             };
-            context.Orders.Add(orders);
+            _context.Orders.Add(orders);
 
-            context.SaveChanges();
+            _context.SaveChanges();
             TempData["orderId"] = orders.OrderId;
             var cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
             List<OrderProducts> OrderProducts = new List<OrderProducts>();
@@ -199,8 +204,8 @@ namespace CoreEcommerceUserPanal.Controllers
                 };
                 OrderProducts.Add(orderproducts);
             }
-            OrderProducts.ForEach(n => context.OrderProducts.Add(n));
-            context.SaveChanges();
+            OrderProducts.ForEach(n => _context.OrderProducts.Add(n));
+            _context.SaveChanges();
             TempData["cust"] = c.CustomerId;
 
 
@@ -235,11 +240,12 @@ namespace CoreEcommerceUserPanal.Controllers
             }
             //var customerService = new CustomerService();
             //ViewBag.details = charge.PaymentMethodDetails.Card.Last4;
-            context.Add<Payments>(payment);
-            context.Payments.Add(payment);
-            context.SaveChanges();
+            _context.Add<Payments>(payment);
+            _context.Payments.Add(payment);
+            _context.SaveChanges();
+            TempData["pay"] = payment.PaymentId;
 
-            return RedirectToAction("Invoice", "Cart");
+            return RedirectToAction("Invoice");
 
         }
 
@@ -264,16 +270,24 @@ namespace CoreEcommerceUserPanal.Controllers
         public IActionResult Invoice()
         {
             int customerid = int.Parse(TempData["cust"].ToString());
-            Customers customer = context.Customers.Where(x => x.CustomerId == customerid).SingleOrDefault();
+            int paymentid = int.Parse(TempData["pay"].ToString());
+            int orderid = int.Parse(TempData["orderId"].ToString());
+            Customers customer = _context.Customers.Where(x => x.CustomerId == customerid).SingleOrDefault();
             ViewBag.Customers = customer;
+
+            Payments payment = _context.Payments.Where(x => x.PaymentId == paymentid).SingleOrDefault();
+            ViewBag.Payment = payment;
+
+           Orders ord = _context.Orders.Where(x => x.OrderId == orderid).SingleOrDefault();
+            ViewBag.Od = ord;
 
             var cart = SessionHelper.GetObjectFromJson<List<Item>>(HttpContext.Session, "cart");
             ViewBag.cart = cart;
             foreach (var Item in cart)
             {
-                Products p = context.Products.Find(Item.Products.ProductId);
+                Products p = _context.Products.Find(Item.Products.ProductId);
                 p.ProductQty = p.ProductQty - Item.Quantity;
-                context.SaveChanges();
+                _context.SaveChanges();
             }
             ViewBag.total = cart.Sum(item => item.Products.ProductPrice * item.Quantity);
             cart = null;
@@ -296,7 +310,7 @@ namespace CoreEcommerceUserPanal.Controllers
             {
                 cart.Add(new Item
                 {
-                    Products = context.Products.Find(id),
+                    Products = _context.Products.Find(id),
                     Quantity = 1
                 });
 
@@ -328,10 +342,29 @@ namespace CoreEcommerceUserPanal.Controllers
         [Route("OutofStock/{id}")]
         public IActionResult OutofStock(int id)
         {
-            var detail = context.Products.Find(id);
-            var cid = context.Products.Find(id);
-            ViewBag.cname = context.Categories.Find(cid.ProductCategoryId);
+            var detail = _context.Products.Find(id);
+            var cid = _context.Products.Find(id);
+            ViewBag.cname = _context.Categories.Find(cid.ProductCategoryId);
             return View(detail);
+
+        }
+
+        [Route("search")]
+        [HttpGet]
+        public IActionResult Search(string search)
+
+        {
+
+            if (search == null)
+            {
+                return RedirectToAction("Index", "Home");
+            }
+
+            HttpContext.Session.SetString("Search", search.ToString());
+
+            ViewBag.prodt = _context.Products.Where(x => x.ProductName == search || x.ProductDescription == search || search == null).ToList();
+            return View();
+
 
         }
     }
